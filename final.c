@@ -1,106 +1,96 @@
-#include<stdio.h>
-#include<conio.h>
+#include<stdio.h> 
+#include<windows.h>
 
-int main()
-{
-	int x;
-	int number_of_process;
-	int process[20];
-	int process_priority[20];
-	int burst_time[20];
-	int waiting_time[20];
-	int turn_around_time[20];
-	int average_waiting_time;
-	int average_turn_around_time;
-	int arrival_time[10];
-	int time_quantum;
-	
-	printf("\t\tRound Robin Scheduling with Higher number Priority and preemption\t\n");
-	printf("\nEnter the number of processes: ");
-	scanf("%d",&number_of_process);
-	printf("enter the time quantum: ");
-	scanf("%d",&time_quantum);
-	printf("Enter the details for processes\n");
-	
-	
-	int i;
-	for (i=0; i<number_of_process; i++)
-	{
-		printf("Process%d\n",i+1);
-		printf("  Priority: ");
-		scanf("%d", &process_priority[i]);
-		printf("  Arrival Time: ");
-		scanf("%d", &arrival_time[i]);
-		printf("  Burst Time: ");
-		scanf("%d", &burst_time[i]);
-		printf("\n\n");
-		process[i] = i+1;
-	}
-	
-	
-	int j;
-	
-	for (i=0; i<number_of_process-1; i++)
-	{
-		for (j=i+1; j<number_of_process; j++)
-		{
-			if(process_priority[i]<process_priority[j])
-			{
-				x = process_priority[i];
-				process_priority[i] = process_priority[j];
-				process_priority[j] = x;
-				x = burst_time[i];
-				burst_time[i] = burst_time[j];
-				burst_time[j] = x;
-				x = process[i];
-				process[i] = process[j];
-				process[j] = x;
-			}
-		}
-	}
-
-waiting_time[0] = 0;
-average_waiting_time = 0;
-turn_around_time[0] = burst_time[0];
-average_turn_around_time = turn_around_time[0];
-
-for(i=1; i<number_of_process; i++)
-{
-	if(time_quantum<number_of_process || time_quantum>number_of_process)
-	{
-		
-		waiting_time[i] = turn_around_time[i-1];
-		average_waiting_time += waiting_time[i];
-		turn_around_time[i] = waiting_time[i] + burst_time[i];
-		average_turn_around_time += turn_around_time[i];
-		 
-	}
-	
-	
-	printf("\n");
-	printf("Gantt chart\n");
-	for(i=0; i<number_of_process; i++)
-	{
-		printf("Process%d", process[i]);
-	}
-	
-
-	
-}	
-	
-	
-	printf("\nProcess_id |\tPriority |\tArrival Time |\tBurst Time | \t Waiting Time| \tTurn Around Time");
-	
-	
-	
-	for(i=0;i<number_of_process;i++)
-	{
-		printf("\n%d \t\t%d \t\t%d \t\t%d \t\t%d \t\t%d\n", i+1, process_priority[i], arrival_time[i], burst_time[i],waiting_time[i], turn_around_time[i]);
-		
-	}
-	printf("Average_waiting_time = %f\n Average_turn_around_time =%f\n\n", (float)average_waiting_time/number_of_process, (float)average_turn_around_time/number_of_process);
-		
-	
-	
-}
-
+ 
+int main() 
+{ 
+      int i, limit, total = 0, x, counter = 0, time_quantum,TAT=0,WT=0; 
+      int arrival_time[10], burst_time[10], temp[10],priority[10]; 
+      float average_wait_time, average_turnaround_time;
+      printf("\t\tRound Robin Scheduling with Higher number Priority and preemption\t");
+	  printf("\nEnter Total Number of Processes:\t"); 
+      scanf("%d", &limit); 
+      x = limit; 
+      for(i = 0; i < limit; i++) //user input
+      {
+            printf("\nEnter Details of Process[%d]\n", i + 1);
+            printf("Arrival Time:\t");
+            scanf("%d", &arrival_time[i]);
+            printf("Burst Time:\t");
+            scanf("%d", &burst_time[i]); 
+            printf("Priority:\t");
+            scanf("%d",&priority[i]);
+           // temp[i] = burst_time[i];
+      } 
+      for(i=0;i<limit;i++) //sorting by priority
+      {
+		int j;      	
+      	for(j=i+1;j<limit;j++)
+      	{
+      		int swap=priority[i];
+      		priority[i]=priority[j];
+      		priority[j]=swap;
+		  }
+		  temp[i]=burst_time[i];
+	  }
+	  printf("\nEnter Time Quantum:\t"); 
+      scanf("%d", &time_quantum); 
+      printf("\nProcess ID\t\tArrival Time\tBurst Time\t Turnaround Time\t Waiting Time\n");
+      for(total = 0, i = 0; x != 0;) 
+      { 
+            if(temp[i] <= time_quantum && temp[i] > 0) //time on every preemption 
+            { 
+                  total = total + temp[i]; 
+                  temp[i] = 0; 
+                  counter = 1; 
+            } 
+            else if(temp[i] > 0) //completion time
+            { 
+                  temp[i] = temp[i] - time_quantum; 
+                  total = total + time_quantum; 
+            } 
+            if(temp[i] == 0 && counter == 1) 
+            { 
+                  x--; 
+                  TAT=total-arrival_time[i];
+                  WT=TAT-burst_time[i];
+                  if(TAT<0)
+                {
+				  TAT=0;
+            	}
+				  if(WT<0)
+                {
+				  WT=0;
+              	}
+				  printf("\nProcess[%d]\t\t%d\t\t%d\t\t %d\t\t\t %d", i + 1,arrival_time[i], burst_time[i], TAT, WT);	
+				 // wait_time = wait_time + total - arrival_time[i] - burst_time[i]; 
+                  //turnaround_time = turnaround_time + total - arrival_time[i]; 
+                  TAT=TAT+total-arrival_time[i];
+                  WT=WT+total-arrival_time[i]-burst_time[i];
+                  if(WT<0)
+                 {
+				 	 WT=0;
+                 }
+				  counter = 0; 
+            } 
+            if(i == limit - 1) 
+            {
+                  i = 0; 
+            }
+            else if(arrival_time[i + 1] <= total) //assigning next process in queue
+            {
+                  i++;
+            }
+            else 
+            {
+                  i = 0;
+            }
+            Sleep(100);
+      } 
+      average_wait_time = WT * 1.0 / limit;
+      average_turnaround_time = TAT * 1.0 / limit;
+      printf("\n\nAverage Waiting Time:\t%0.2f", average_wait_time); 
+      Sleep(100);
+      printf("\nAvg Turnaround Time:\t%0.2f\n", average_turnaround_time); 
+      return 0; 
+  }
